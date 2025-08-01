@@ -1,0 +1,76 @@
+{
+  "version": "1.0",
+  "description": "Task list for bootstrapping FigureForge app",
+  "tasks": [
+    {
+      "title": "Setup Repository",
+      "description": "Initialize a Git repo with a Django REST backend and React SPA frontend.",
+      "commands": [
+        "mkdir figureforge && cd figureforge",
+        "git init",
+        "npx create-react-app frontend",
+        "django-admin startproject backend",
+        "cd backend && pip install django djangorestframework boto3 stripe zappa"
+      ]
+    },
+    {
+      "title": "Configure Serverless",
+      "description": "Setup Zappa for AWS Lambda deployment of Django.",
+      "commands": [
+        "cd backend",
+        "pip install zappa",
+        "zappa init"
+      ]
+    },
+    {
+      "title": "Create DynamoDB Schema Helpers",
+      "description": "Add a Python module for DynamoDB single-table design with PK/SK and GSIs.",
+      "commands": [
+        "touch backend/core/dynamodb_utils.py",
+        "# Implement CRUD helpers based on data-structure.md"
+      ]
+    },
+    {
+      "title": "Implement Auth with Cognito",
+      "description": "Integrate Cognito JWT validation in Django middleware.",
+      "commands": [
+        "pip install python-jose",
+        "# Add middleware for Cognito JWT validation"
+      ]
+    },
+    {
+      "title": "Stripe Integration",
+      "description": "Setup Stripe API keys, webhook handlers, and billing portal endpoints.",
+      "commands": [
+        "pip install stripe",
+        "# Implement endpoints as per stripe-webhooks.md"
+      ]
+    },
+    {
+      "title": "Job Queue",
+      "description": "Setup SQS and Worker Lambda for image generation.",
+      "commands": [
+        "# Configure AWS SQS and worker Lambda function",
+        "# Worker calls fal.ai API and stores results in S3 and DynamoDB"
+      ]
+    },
+    {
+      "title": "Frontend Setup",
+      "description": "Build React SPA with routes: /generate, /gallery, /billing.",
+      "commands": [
+        "cd frontend",
+        "npm install axios react-router-dom",
+        "# Implement pages and components based on tasks.md"
+      ]
+    },
+    {
+      "title": "Deploy Infrastructure",
+      "description": "Deploy S3 buckets, CloudFront, and DynamoDB using AWS CLI/CDK.",
+      "commands": [
+        "# Create S3 bucket for SPA",
+        "# Setup CloudFront distribution",
+        "# Deploy backend via Zappa"
+      ]
+    }
+  ]
+}
