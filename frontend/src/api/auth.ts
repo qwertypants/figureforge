@@ -4,14 +4,38 @@ import { User } from '../types/types'
 export const authAPI = {
   // Get current user profile
   getProfile: async (): Promise<User> => {
-    const response = await api.get<User>('/me')
-    return response.data
+    const response = await api.get('/auth/user/')
+    // Map backend response to User type
+    const userData: User = {
+      id: response.data.user_id,
+      email: response.data.email,
+      username: response.data.username,
+      role: response.data.role,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      subscription: {
+        plan: response.data.subscription_plan || 'hobby',
+        status: 'active',
+        quota_limit: response.data.quota_limit || 50,
+        quota_remaining: (response.data.quota_limit || 50) - (response.data.quota_used || 0),
+        current_period_start: new Date().toISOString(),
+        current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      }
+    }
+    return userData
   },
   
   // Update username
   updateUsername: async (username: string): Promise<User> => {
-    const response = await api.patch<User>('/me/username', { username })
-    return response.data
+    const response = await api.put('/auth/user/update/', { username })
+    // Map backend response to User type
+    return {
+      id: response.data.user.user_id,
+      email: response.data.user.email,
+      username: response.data.user.username,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    } as User
   },
   
   // Logout (if backend has logout endpoint)

@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
-import axios from 'axios';
-import { useAuthStore } from '../stores/authStore';
+import api from '../api/config';
+import useAuthStore from '../stores/authStore';
 
 export default function MagicLinkCallback() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { setAuth } = useAuthStore();
+  const { setUser } = useAuthStore();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -15,7 +15,7 @@ export default function MagicLinkCallback() {
     const verifyMagicLink = async () => {
       const token = searchParams.get('token');
       const email = searchParams.get('email');
-      
+
       // Get stored session from sessionStorage
       const session = sessionStorage.getItem('magicLinkSession');
       const storedEmail = sessionStorage.getItem('magicLinkEmail');
@@ -40,7 +40,7 @@ export default function MagicLinkCallback() {
       }
 
       try {
-        const response = await axios.post('/api/auth/magic-link/verify/', {
+        const response = await api.post('/auth/magic-link/verify/', {
           email,
           token,
           session
@@ -49,30 +49,39 @@ export default function MagicLinkCallback() {
         if (response.data.id_token) {
           // Store the token
           localStorage.setItem('authToken', response.data.id_token);
-          
+
           // Clear session storage
           sessionStorage.removeItem('magicLinkSession');
           sessionStorage.removeItem('magicLinkEmail');
-          
+
           // Fetch user profile
           try {
-            const userResponse = await axios.get('/api/auth/user/', {
-              headers: {
-                Authorization: `Bearer ${response.data.id_token}`
+            const userResponse = await api.get('/auth/user/');
+
+            // Map the response to User type structure
+            const userData: any = {
+              id: userResponse.data.user_id,
+              email: userResponse.data.email,
+              username: userResponse.data.username,
+              role: userResponse.data.role,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              subscription: {
+                plan: userResponse.data.subscription_plan || 'hobby',
+                status: 'active',
+                quota_limit: userResponse.data.quota_limit || 50,
+                quota_remaining: (userResponse.data.quota_limit || 50) - (userResponse.data.quota_used || 0),
+                current_period_start: new Date().toISOString(),
+                current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
               }
-            });
-            
-            setAuth({
-              isAuthenticated: true,
-              user: userResponse.data.user,
-              subscription: userResponse.data.subscription
-            });
-            
+            };
+            setUser(userData);
+
             setStatus('success');
-            
+
             // Redirect after a short delay
             setTimeout(() => {
-              const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/dashboard';
+              const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/generate';
               sessionStorage.removeItem('redirectAfterLogin');
               navigate(redirectPath);
             }, 1500);
@@ -89,7 +98,7 @@ export default function MagicLinkCallback() {
     };
 
     verifyMagicLink();
-  }, [searchParams, navigate, setAuth]);
+  }, [searchParams, navigate, setUser]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -106,7 +115,7 @@ export default function MagicLinkCallback() {
               </p>
             </>
           )}
-          
+
           {status === 'success' && (
             <>
               <CheckCircle className="mx-auto h-12 w-12 text-green-600" />
@@ -118,7 +127,7 @@ export default function MagicLinkCallback() {
               </p>
             </>
           )}
-          
+
           {status === 'error' && (
             <>
               <XCircle className="mx-auto h-12 w-12 text-red-600" />

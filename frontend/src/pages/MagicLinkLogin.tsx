@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, ArrowLeft, Loader2 } from 'lucide-react';
-import axios from 'axios';
+import api from '../api/config';
 
 export default function MagicLinkLogin() {
   const [email, setEmail] = useState('');
@@ -16,7 +16,7 @@ export default function MagicLinkLogin() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('/api/auth/magic-link/request/', {
+      const response = await api.post('/auth/magic-link/request/', {
         email
       });
 
