@@ -23,7 +23,9 @@
       "Bash(python manage.py test:*)",
       "Bash(python -m pytest api/core/tests/test_s3_utils.py -xvs)",
       "Bash(python -m pytest api/core/tests/test_s3_utils.py::TestCloudFrontSigner::test_generate_signed_url_with_cloudfront -xvs)",
-      "Bash(python -m pytest api/core/tests/test_s3_utils.py -v)"
+      "Bash(python -m pytest api/core/tests/test_s3_utils.py -v)",
+      "Bash(npx storybook@latest init:*)",
+      "Bash(npm run format:*)"
     ],
     "deny": []
   }

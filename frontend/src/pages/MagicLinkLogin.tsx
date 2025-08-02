@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Mail, ArrowLeft, Loader2 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import useAuthStore from '../stores/authStore';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Mail, ArrowLeft, Loader2 } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import useAuthStore from "../stores/authStore";
 
 export default function MagicLinkLogin() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
   const { requestMagicLink } = useAuth();
@@ -19,10 +19,12 @@ export default function MagicLinkLogin() {
 
     try {
       await requestMagicLink(email);
-      sessionStorage.setItem('magicLinkEmail', email);
+      sessionStorage.setItem("magicLinkEmail", email);
       setIsSent(true);
     } catch (err: any) {
-      setError(err.response?.data?.error || err.message || 'Failed to send magic link');
+      setError(
+        err.response?.data?.error || err.message || "Failed to send magic link",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -42,8 +44,8 @@ export default function MagicLinkLogin() {
             We've sent a magic link to <strong>{email}</strong>
           </p>
           <p className="mt-4 text-sm text-gray-600">
-            Click the link in the email to sign in to your account.
-            The link will expire in 15 minutes.
+            Click the link in the email to sign in to your account. The link
+            will expire in 15 minutes.
           </p>
           <button
             onClick={() => setIsSent(false)}
@@ -60,7 +62,7 @@ export default function MagicLinkLogin() {
     <div className="max-w-md mx-auto">
       <div>
         <button
-          onClick={() => navigate('/login')}
+          onClick={() => navigate("/login")}
           className="flex items-center text-gray-600 hover:text-gray-900 mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -75,7 +77,10 @@ export default function MagicLinkLogin() {
       </div>
       <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700"
+          >
             Email address
           </label>
           <input

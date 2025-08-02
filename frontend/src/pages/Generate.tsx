@@ -1,102 +1,115 @@
-import { useState, FormEvent, ChangeEvent } from 'react'
-import useAuthStore from '../stores/authStore'
-import useImageStore from '../stores/imageStore'
-import { imagesAPI } from '../api/images'
-import { 
-  BodyType, 
-  PoseType, 
-  CameraAngle, 
-  LightingType, 
-  ClothingType, 
-  BackgroundType, 
-  EthnicityType, 
-  AgeRange, 
-  GenderPresentation 
-} from '../types/types'
+import { useState, FormEvent, ChangeEvent } from "react";
+import useAuthStore from "../stores/authStore";
+import useImageStore from "../stores/imageStore";
+import { imagesAPI } from "../api/images";
+import {
+  BodyType,
+  PoseType,
+  CameraAngle,
+  LightingType,
+  ClothingType,
+  BackgroundType,
+  EthnicityType,
+  AgeRange,
+  GenderPresentation,
+} from "../types/types";
 
 function Generate() {
-  const { hasActiveSubscription, getQuotaRemaining } = useAuthStore()
-  const { generationForm, updateGenerationForm, setCurrentJob, setIsGenerating, isGenerating, currentJob } = useImageStore()
-  const [error, setError] = useState<string | null>(null)
-  
-  const quotaRemaining = getQuotaRemaining()
-  const canGenerate = hasActiveSubscription() && quotaRemaining > 0
-  
+  const { hasActiveSubscription, getQuotaRemaining } = useAuthStore();
+  const {
+    generationForm,
+    updateGenerationForm,
+    setCurrentJob,
+    setIsGenerating,
+    isGenerating,
+    currentJob,
+  } = useImageStore();
+  const [error, setError] = useState<string | null>(null);
+
+  const quotaRemaining = getQuotaRemaining();
+  const canGenerate = hasActiveSubscription() && quotaRemaining > 0;
+
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     if (!canGenerate) {
-      setError('You need an active subscription to generate images')
-      return
+      setError("You need an active subscription to generate images");
+      return;
     }
-    
+
     if (generationForm.batch_size > quotaRemaining) {
-      setError(`You only have ${quotaRemaining} images remaining in your quota`)
-      return
+      setError(
+        `You only have ${quotaRemaining} images remaining in your quota`,
+      );
+      return;
     }
-    
-    setError(null)
-    setIsGenerating(true)
-    
+
+    setError(null);
+    setIsGenerating(true);
+
     try {
-      const job = await imagesAPI.generate(generationForm)
-      setCurrentJob(job)
+      const job = await imagesAPI.generate(generationForm);
+      setCurrentJob(job);
       // Poll for job status
-      pollJobStatus(job.job_id)
+      pollJobStatus(job.job_id);
     } catch (error: any) {
-      setError(error.response?.data?.detail || 'Failed to generate images')
-      setIsGenerating(false)
+      setError(error.response?.data?.detail || "Failed to generate images");
+      setIsGenerating(false);
     }
-  }
-  
+  };
+
   const pollJobStatus = async (jobId: string) => {
     const pollInterval = setInterval(async () => {
       try {
-        const job = await imagesAPI.getJobStatus(jobId)
-        setCurrentJob(job)
-        
-        if (job.status === 'completed' || job.status === 'failed') {
-          clearInterval(pollInterval)
-          setIsGenerating(false)
-          
-          if (job.status === 'failed') {
-            setError('Image generation failed. Please try again.')
+        const job = await imagesAPI.getJobStatus(jobId);
+        setCurrentJob(job);
+
+        if (job.status === "completed" || job.status === "failed") {
+          clearInterval(pollInterval);
+          setIsGenerating(false);
+
+          if (job.status === "failed") {
+            setError("Image generation failed. Please try again.");
           }
         }
       } catch {
-        clearInterval(pollInterval)
-        setIsGenerating(false)
-        setError('Failed to check job status')
+        clearInterval(pollInterval);
+        setIsGenerating(false);
+        setError("Failed to check job status");
       }
-    }, 2000) // Poll every 2 seconds
-  }
-  
+    }, 2000); // Poll every 2 seconds
+  };
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Generate Reference Images</h1>
         <p className="text-gray-600">
-          Customize your figure drawing references. You have {quotaRemaining} images remaining this month.
+          Customize your figure drawing references. You have {quotaRemaining}{" "}
+          images remaining this month.
         </p>
       </div>
-      
+
       {!canGenerate && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
           <p className="text-yellow-800">
-            {hasActiveSubscription() 
-              ? 'You have used all your images for this month. Your quota will reset on the next billing cycle.'
-              : 'You need an active subscription to generate images.'}
+            {hasActiveSubscription()
+              ? "You have used all your images for this month. Your quota will reset on the next billing cycle."
+              : "You need an active subscription to generate images."}
           </p>
         </div>
       )}
-      
+
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
           <p className="text-red-800">{error}</p>
         </div>
       )}
-      
-      <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow">
+
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-6 bg-white p-6 rounded-lg shadow"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -104,7 +117,9 @@ function Generate() {
             </label>
             <select
               value={generationForm.batch_size}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => updateGenerationForm({ batch_size: parseInt(e.target.value) })}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                updateGenerationForm({ batch_size: parseInt(e.target.value) })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
               <option value={1}>1 image</option>
@@ -113,14 +128,16 @@ function Generate() {
               <option value={4}>4 images</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Body Type
             </label>
             <select
               value={generationForm.body_type}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => updateGenerationForm({ body_type: e.target.value as BodyType })}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                updateGenerationForm({ body_type: e.target.value as BodyType })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="slim">Slim</option>
@@ -130,14 +147,16 @@ function Generate() {
               <option value="heavyset">Heavyset</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Pose Type
             </label>
             <select
               value={generationForm.pose_type}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => updateGenerationForm({ pose_type: e.target.value as PoseType })}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                updateGenerationForm({ pose_type: e.target.value as PoseType })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="standing">Standing</option>
@@ -147,14 +166,18 @@ function Generate() {
               <option value="gesture">Gesture</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Camera Angle
             </label>
             <select
               value={generationForm.camera_angle}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => updateGenerationForm({ camera_angle: e.target.value as CameraAngle })}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                updateGenerationForm({
+                  camera_angle: e.target.value as CameraAngle,
+                })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="eye_level">Eye Level</option>
@@ -164,14 +187,18 @@ function Generate() {
               <option value="profile">Profile</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Lighting
             </label>
             <select
               value={generationForm.lighting}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => updateGenerationForm({ lighting: e.target.value as LightingType })}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                updateGenerationForm({
+                  lighting: e.target.value as LightingType,
+                })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="studio">Studio</option>
@@ -181,14 +208,18 @@ function Generate() {
               <option value="soft">Soft</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Clothing
             </label>
             <select
               value={generationForm.clothing}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => updateGenerationForm({ clothing: e.target.value as ClothingType })}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                updateGenerationForm({
+                  clothing: e.target.value as ClothingType,
+                })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="casual">Casual</option>
@@ -198,14 +229,18 @@ function Generate() {
               <option value="traditional">Traditional</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Background
             </label>
             <select
               value={generationForm.background}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => updateGenerationForm({ background: e.target.value as BackgroundType })}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                updateGenerationForm({
+                  background: e.target.value as BackgroundType,
+                })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="simple">Simple</option>
@@ -215,14 +250,18 @@ function Generate() {
               <option value="architectural">Architectural</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Ethnicity
             </label>
             <select
               value={generationForm.ethnicity}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => updateGenerationForm({ ethnicity: e.target.value as EthnicityType })}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                updateGenerationForm({
+                  ethnicity: e.target.value as EthnicityType,
+                })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="diverse">Diverse</option>
@@ -234,14 +273,16 @@ function Generate() {
               <option value="south_asian">South Asian</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Age Range
             </label>
             <select
               value={generationForm.age_range}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => updateGenerationForm({ age_range: e.target.value as AgeRange })}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                updateGenerationForm({ age_range: e.target.value as AgeRange })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="young_adult">Young Adult</option>
@@ -250,14 +291,18 @@ function Generate() {
               <option value="elderly">Elderly</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Gender Presentation
             </label>
             <select
               value={generationForm.gender_presentation}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => updateGenerationForm({ gender_presentation: e.target.value as GenderPresentation })}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                updateGenerationForm({
+                  gender_presentation: e.target.value as GenderPresentation,
+                })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="androgynous">Androgynous</option>
@@ -266,23 +311,27 @@ function Generate() {
             </select>
           </div>
         </div>
-        
+
         <button
           type="submit"
           disabled={!canGenerate || isGenerating}
           className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400"
         >
-          {isGenerating ? 'Generating...' : `Generate ${generationForm.batch_size} Image${generationForm.batch_size > 1 ? 's' : ''}`}
+          {isGenerating
+            ? "Generating..."
+            : `Generate ${generationForm.batch_size} Image${generationForm.batch_size > 1 ? "s" : ""}`}
         </button>
       </form>
-      
+
       {/* Job Status Display */}
       {currentJob && (
         <div className="mt-8 bg-white p-6 rounded-lg shadow">
           <h3 className="text-lg font-semibold mb-4">Generation Status</h3>
           <div className="space-y-2">
-            <p>Status: <span className="font-medium">{currentJob.status}</span></p>
-            {currentJob.status === 'completed' && (
+            <p>
+              Status: <span className="font-medium">{currentJob.status}</span>
+            </p>
+            {currentJob.status === "completed" && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                 {currentJob.images?.map((image, index) => (
                   <img
@@ -298,7 +347,7 @@ function Generate() {
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export default Generate
+export default Generate;

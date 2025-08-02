@@ -1,6 +1,6 @@
-import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
-import { AuthState } from '../types/types'
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { AuthState } from "../types/types";
 
 const useAuthStore = create<AuthState>()(
   persist(
@@ -9,49 +9,51 @@ const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false,
       error: null,
-      
-      setUser: (user) => set({ 
-        user, 
-        isAuthenticated: !!user,
-        error: null 
-      }),
-      
+
+      setUser: (user) =>
+        set({
+          user,
+          isAuthenticated: !!user,
+          error: null,
+        }),
+
       setLoading: (isLoading) => set({ isLoading }),
-      
+
       setError: (error) => set({ error }),
-      
-      logout: () => set({ 
-        user: null, 
-        isAuthenticated: false,
-        error: null 
-      }),
-      
+
+      logout: () =>
+        set({
+          user: null,
+          isAuthenticated: false,
+          error: null,
+        }),
+
       clearError: () => set({ error: null }),
-      
+
       hasActiveSubscription: () => {
-        const { user } = get()
-        return user?.subscription?.status === 'active'
+        const { user } = get();
+        return user?.subscription?.status === "active";
       },
-      
+
       getQuotaRemaining: () => {
-        const { user } = get()
-        if (!user?.subscription) return 0
-        return user.subscription.quota_remaining || 0
+        const { user } = get();
+        if (!user?.subscription) return 0;
+        return user.subscription.quota_remaining || 0;
       },
-      
+
       isAdmin: () => {
-        const { user } = get()
-        return user?.role === 'admin'
-      }
+        const { user } = get();
+        return user?.role === "admin";
+      },
     }),
     {
-      name: 'auth-storage',
-      partialize: (state) => ({ 
+      name: "auth-storage",
+      partialize: (state) => ({
         user: state.user,
-        isAuthenticated: state.isAuthenticated 
-      })
-    }
-  )
-)
+        isAuthenticated: state.isAuthenticated,
+      }),
+    },
+  ),
+);
 
-export default useAuthStore
+export default useAuthStore;

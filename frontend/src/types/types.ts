@@ -3,15 +3,15 @@ export interface User {
   id: string;
   email: string;
   username?: string;
-  role?: 'admin' | 'user';
+  role?: "admin" | "user";
   subscription?: Subscription;
   created_at: string;
   updated_at: string;
 }
 
 export interface Subscription {
-  plan: 'hobby' | 'pro' | 'studio' | string;
-  status: 'active' | 'inactive' | 'cancelled' | 'past_due';
+  plan: "hobby" | "pro" | "studio" | string;
+  status: "active" | "inactive" | "cancelled" | "past_due";
   quota_limit: number;
   quota_remaining: number;
   current_period_start: string;
@@ -63,20 +63,47 @@ export interface GenerationParameters {
 }
 
 // Enum types for generation options
-export type BodyType = 'slim' | 'average' | 'athletic' | 'curvy' | 'heavyset';
-export type PoseType = 'standing' | 'sitting' | 'action' | 'reclining' | 'gesture';
-export type CameraAngle = 'eye_level' | 'low_angle' | 'high_angle' | 'dutch_angle' | 'profile';
-export type LightingType = 'studio' | 'natural' | 'dramatic' | 'rim' | 'soft';
-export type ClothingType = 'casual' | 'formal' | 'athletic' | 'minimal' | 'traditional';
-export type BackgroundType = 'simple' | 'studio' | 'outdoor' | 'abstract' | 'architectural';
-export type EthnicityType = 'diverse' | 'african' | 'asian' | 'caucasian' | 'hispanic' | 'middle_eastern' | 'south_asian';
-export type AgeRange = 'young_adult' | 'adult' | 'middle_aged' | 'elderly';
-export type GenderPresentation = 'androgynous' | 'masculine' | 'feminine';
+export type BodyType = "slim" | "average" | "athletic" | "curvy" | "heavyset";
+export type PoseType =
+  | "standing"
+  | "sitting"
+  | "action"
+  | "reclining"
+  | "gesture";
+export type CameraAngle =
+  | "eye_level"
+  | "low_angle"
+  | "high_angle"
+  | "dutch_angle"
+  | "profile";
+export type LightingType = "studio" | "natural" | "dramatic" | "rim" | "soft";
+export type ClothingType =
+  | "casual"
+  | "formal"
+  | "athletic"
+  | "minimal"
+  | "traditional";
+export type BackgroundType =
+  | "simple"
+  | "studio"
+  | "outdoor"
+  | "abstract"
+  | "architectural";
+export type EthnicityType =
+  | "diverse"
+  | "african"
+  | "asian"
+  | "caucasian"
+  | "hispanic"
+  | "middle_eastern"
+  | "south_asian";
+export type AgeRange = "young_adult" | "adult" | "middle_aged" | "elderly";
+export type GenderPresentation = "androgynous" | "masculine" | "feminine";
 
 // Job types
 export interface GenerationJob {
   job_id: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: "pending" | "processing" | "completed" | "failed";
   images?: Image[];
   created_at: string;
   completed_at?: string;
@@ -181,7 +208,7 @@ export interface SignUpForm {
 }
 
 export interface ReportForm {
-  reason: 'inappropriate' | 'copyright' | 'quality' | 'other';
+  reason: "inappropriate" | "copyright" | "quality" | "other";
   details: string;
 }
 
@@ -191,7 +218,7 @@ export interface UpdateUsernameForm {
 
 // UI State Types
 export interface Message {
-  type: 'success' | 'error' | 'info';
+  type: "success" | "error" | "info";
   text: string;
 }
 
@@ -209,7 +236,7 @@ export interface ApiConfig {
   baseURL: string;
   timeout: number;
   headers: {
-    'Content-Type': string;
+    "Content-Type": string;
     Authorization?: string;
   };
 }

@@ -21,16 +21,19 @@ This is the frontend application for FigureForge - an AI-powered figure drawing 
 ## Setup
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
 
 2. Create a `.env` file based on the example:
+
 ```bash
 cp .env.example .env
 ```
 
 3. Configure environment variables in `.env`:
+
 ```
 VITE_API_URL=http://localhost:8000/api
 VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your-stripe-key
@@ -42,6 +45,7 @@ VITE_COGNITO_DOMAIN=your-cognito-domain
 ## Development
 
 Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -103,18 +107,21 @@ src/
 ## Authentication Flow
 
 The app supports two authentication methods:
+
 1. **Standard Cognito Auth**: Traditional email/password login
 2. **Magic Link**: Passwordless email authentication
 
 ## State Management
 
 Global state is managed using Zustand stores:
+
 - `authStore`: User authentication state
 - `imageStore`: Generated images and gallery state
 
 ## API Integration
 
 All API calls go through the modules in `src/api/`:
+
 - Axios interceptors handle authentication headers
 - Base URL is configured via environment variable
 - Error handling is centralized
@@ -122,6 +129,7 @@ All API calls go through the modules in `src/api/`:
 ## Deployment
 
 Build the production bundle:
+
 ```bash
 npm run build
 ```
@@ -130,13 +138,13 @@ The built files will be in the `dist/` directory, ready to be deployed to your h
 
 ## Environment Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `VITE_API_URL` | Backend API URL | `http://localhost:8000/api` |
-| `VITE_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key | `pk_test_...` |
-| `VITE_COGNITO_USER_POOL_ID` | AWS Cognito user pool ID | `us-east-1_...` |
-| `VITE_COGNITO_CLIENT_ID` | Cognito app client ID | `abc123...` |
-| `VITE_COGNITO_DOMAIN` | Cognito hosted UI domain | `figureforge.auth...` |
+| Variable                      | Description              | Example                     |
+| ----------------------------- | ------------------------ | --------------------------- |
+| `VITE_API_URL`                | Backend API URL          | `http://localhost:8000/api` |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key   | `pk_test_...`               |
+| `VITE_COGNITO_USER_POOL_ID`   | AWS Cognito user pool ID | `us-east-1_...`             |
+| `VITE_COGNITO_CLIENT_ID`      | Cognito app client ID    | `abc123...`                 |
+| `VITE_COGNITO_DOMAIN`         | Cognito hosted UI domain | `figureforge.auth...`       |
 
 ## Contributing
 

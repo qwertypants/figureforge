@@ -1,63 +1,65 @@
-import { useState, FormEvent } from 'react'
-import useImageStore from '../stores/imageStore'
-import useAuthStore from '../stores/authStore'
-import { imagesAPI } from '../api/images'
-import { Image, ReportForm } from '../types/types'
+import { useState, FormEvent } from "react";
+import useImageStore from "../stores/imageStore";
+import useAuthStore from "../stores/authStore";
+import { imagesAPI } from "../api/images";
+import { Image, ReportForm } from "../types/types";
 
 interface ImageCardProps {
-  image: Image
-  showActions?: boolean
+  image: Image;
+  showActions?: boolean;
 }
 
 function ImageCard({ image, showActions = false }: ImageCardProps) {
-  const { isFavorited, addToFavorites, removeFromFavorites } = useImageStore()
-  const { isAuthenticated } = useAuthStore()
-  const [isReporting, setIsReporting] = useState(false)
-  const [reportReason, setReportReason] = useState<ReportForm['reason'] | ''>('')
-  const [reportDetails, setReportDetails] = useState('')
-  
+  const { isFavorited, addToFavorites, removeFromFavorites } = useImageStore();
+  const { isAuthenticated } = useAuthStore();
+  const [isReporting, setIsReporting] = useState(false);
+  const [reportReason, setReportReason] = useState<ReportForm["reason"] | "">(
+    "",
+  );
+  const [reportDetails, setReportDetails] = useState("");
+
   const handleToggleFavorite = async () => {
     try {
-      await imagesAPI.toggleFavorite(image.id)
+      await imagesAPI.toggleFavorite(image.id);
       if (isFavorited(image.id)) {
-        removeFromFavorites(image.id)
+        removeFromFavorites(image.id);
       } else {
-        addToFavorites(image.id)
+        addToFavorites(image.id);
       }
     } catch (error) {
-      console.error('Failed to toggle favorite:', error)
+      console.error("Failed to toggle favorite:", error);
     }
-  }
-  
+  };
+
   const handleReport = async (e: FormEvent) => {
-    e.preventDefault()
-    if (!reportReason) return
-    
+    e.preventDefault();
+    if (!reportReason) return;
+
     try {
-      await imagesAPI.reportImage(image.id, reportReason, reportDetails)
-      setIsReporting(false)
-      setReportReason('')
-      setReportDetails('')
-      alert('Image reported successfully')
+      await imagesAPI.reportImage(image.id, reportReason, reportDetails);
+      setIsReporting(false);
+      setReportReason("");
+      setReportDetails("");
+      alert("Image reported successfully");
     } catch (error) {
-      console.error('Failed to report image:', error)
-      alert('Failed to report image')
+      console.error("Failed to report image:", error);
+      alert("Failed to report image");
     }
-  }
-  
+  };
+
   const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this image?')) {
+    if (window.confirm("Are you sure you want to delete this image?")) {
       try {
-        await imagesAPI.deleteImage(image.id)
+        await imagesAPI.deleteImage(image.id);
         // Refresh the gallery
-        window.location.reload()
+        window.location.reload();
       } catch (error) {
-        console.error('Failed to delete image:', error)
-        alert('Failed to delete image')
+        console.error("Failed to delete image:", error);
+        alert("Failed to delete image");
       }
     }
-  }
-  
+  };
+
   return (
     <div className="relative group">
       <img
@@ -65,18 +67,22 @@ function ImageCard({ image, showActions = false }: ImageCardProps) {
         alt="Figure reference"
         className="w-full h-auto rounded-lg shadow-md"
       />
-      
+
       {/* Overlay actions */}
       {isAuthenticated && (
         <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={handleToggleFavorite}
             className="bg-white p-2 rounded-full shadow-lg hover:bg-gray-100"
-            title={isFavorited(image.id) ? 'Remove from favorites' : 'Add to favorites'}
+            title={
+              isFavorited(image.id)
+                ? "Remove from favorites"
+                : "Add to favorites"
+            }
           >
             <svg
-              className={`w-5 h-5 ${isFavorited(image.id) ? 'text-red-500' : 'text-gray-600'}`}
-              fill={isFavorited(image.id) ? 'currentColor' : 'none'}
+              className={`w-5 h-5 ${isFavorited(image.id) ? "text-red-500" : "text-gray-600"}`}
+              fill={isFavorited(image.id) ? "currentColor" : "none"}
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
@@ -88,7 +94,7 @@ function ImageCard({ image, showActions = false }: ImageCardProps) {
               />
             </svg>
           </button>
-          
+
           {!showActions && (
             <button
               onClick={() => setIsReporting(true)}
@@ -110,7 +116,7 @@ function ImageCard({ image, showActions = false }: ImageCardProps) {
               </svg>
             </button>
           )}
-          
+
           {showActions && (
             <button
               onClick={handleDelete}
@@ -134,7 +140,7 @@ function ImageCard({ image, showActions = false }: ImageCardProps) {
           )}
         </div>
       )}
-      
+
       {/* Report modal */}
       {isReporting && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -147,7 +153,9 @@ function ImageCard({ image, showActions = false }: ImageCardProps) {
                 </label>
                 <select
                   value={reportReason}
-                  onChange={(e) => setReportReason(e.target.value as ReportForm['reason'])}
+                  onChange={(e) =>
+                    setReportReason(e.target.value as ReportForm["reason"])
+                  }
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 >
@@ -158,7 +166,7 @@ function ImageCard({ image, showActions = false }: ImageCardProps) {
                   <option value="other">Other</option>
                 </select>
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Details (optional)
@@ -170,7 +178,7 @@ function ImageCard({ image, showActions = false }: ImageCardProps) {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-              
+
               <div className="flex gap-3">
                 <button
                   type="submit"
@@ -191,7 +199,7 @@ function ImageCard({ image, showActions = false }: ImageCardProps) {
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export default ImageCard
+export default ImageCard;

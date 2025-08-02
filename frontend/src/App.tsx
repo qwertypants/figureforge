@@ -1,27 +1,33 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { useAuth } from './contexts/AuthContext'
-import type { ProtectedRouteProps } from './types/types'
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
+import { useAuth } from "./contexts/AuthContext";
+import type { ProtectedRouteProps } from "./types/types";
 
 // Layout
-import Layout from './components/Layout'
+import Layout from "./components/Layout";
 
 // Pages
-import Home from './pages/Home'
-import Login from './pages/Login'
-import SignUp from './pages/SignUp'
-import Generate from './pages/Generate'
-import PublicGallery from './pages/PublicGallery'
-import MyImages from './pages/MyImages'
-import Account from './pages/Account'
-import Pricing from './pages/Pricing'
-import AuthCallback from './pages/AuthCallback'
-import MagicLinkLogin from './pages/MagicLinkLogin'
-import MagicLinkCallback from './pages/MagicLinkCallback'
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
+import Generate from "./pages/Generate";
+import PublicGallery from "./pages/PublicGallery";
+import MyImages from "./pages/MyImages";
+import Account from "./pages/Account";
+import Pricing from "./pages/Pricing";
+import AuthCallback from "./pages/AuthCallback";
+import MagicLinkLogin from "./pages/MagicLinkLogin";
+import MagicLinkCallback from "./pages/MagicLinkCallback";
 
 // Protected Route component
 function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = useAuth()
-  const location = useLocation()
+  const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -31,10 +37,14 @@ function ProtectedRoute({ children }: ProtectedRouteProps) {
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
-    )
+    );
   }
 
-  return isAuthenticated ? children : <Navigate to="/login" state={{ from: location }} replace />
+  return isAuthenticated ? (
+    children
+  ) : (
+    <Navigate to="/login" state={{ from: location }} replace />
+  );
 }
 
 function App() {
@@ -79,7 +89,7 @@ function App() {
         </Route>
       </Routes>
     </Router>
-  )
+  );
 }
 
-export default App
+export default App;

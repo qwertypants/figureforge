@@ -1,75 +1,81 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import useImageStore from '../stores/imageStore'
-import { imagesAPI } from '../api/images'
-import ImageCard from '../components/ImageCard'
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import useImageStore from "../stores/imageStore";
+import { imagesAPI } from "../api/images";
+import ImageCard from "../components/ImageCard";
 
-type ViewType = 'all' | 'favorites'
+type ViewType = "all" | "favorites";
 
 function MyImages() {
-  const { userImages, setUserImages, setFavorites, isLoadingGallery, setIsLoadingGallery } = useImageStore()
-  const [cursor, setCursor] = useState<string | null>(null)
-  const [hasMore, setHasMore] = useState(true)
-  const [view, setView] = useState<ViewType>('all')
-  
+  const {
+    userImages,
+    setUserImages,
+    setFavorites,
+    isLoadingGallery,
+    setIsLoadingGallery,
+  } = useImageStore();
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [view, setView] = useState<ViewType>("all");
+
   useEffect(() => {
-    if (view === 'all') {
-      loadUserImages()
+    if (view === "all") {
+      loadUserImages();
     } else {
-      loadFavorites()
+      loadFavorites();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view])
-  
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view]);
+
   const loadUserImages = async (loadMore = false) => {
     if (!loadMore) {
-      setIsLoadingGallery(true)
+      setIsLoadingGallery(true);
     }
-    
+
     try {
-      const response = await imagesAPI.getUserImages(loadMore ? cursor : null)
-      setUserImages(response.images, loadMore)
-      setCursor(response.next_cursor || null)
-      setHasMore(!!response.next_cursor)
+      const response = await imagesAPI.getUserImages(loadMore ? cursor : null);
+      setUserImages(response.images, loadMore);
+      setCursor(response.next_cursor || null);
+      setHasMore(!!response.next_cursor);
     } catch (error) {
-      console.error('Failed to load user images:', error)
+      console.error("Failed to load user images:", error);
     } finally {
-      setIsLoadingGallery(false)
+      setIsLoadingGallery(false);
     }
-  }
-  
+  };
+
   const loadFavorites = async () => {
-    setIsLoadingGallery(true)
-    
+    setIsLoadingGallery(true);
+
     try {
-      const response = await imagesAPI.getFavorites()
+      const response = await imagesAPI.getFavorites();
       // Store the favorite images in userImages when viewing favorites
-      setUserImages(response.images, false)
+      setUserImages(response.images, false);
       // Extract and store the image IDs in favorites
-      setFavorites(response.images.map(img => img.id))
+      setFavorites(response.images.map((img) => img.id));
     } catch (error) {
-      console.error('Failed to load favorites:', error)
+      console.error("Failed to load favorites:", error);
     } finally {
-      setIsLoadingGallery(false)
+      setIsLoadingGallery(false);
     }
-  }
-  
+  };
+
   const handleLoadMore = () => {
-    if (hasMore && !isLoadingGallery && view === 'all') {
-      loadUserImages(true)
+    if (hasMore && !isLoadingGallery && view === "all") {
+      loadUserImages(true);
     }
-  }
-  
-  const displayImages = userImages
-  
+  };
+
+  const displayImages = userImages;
+
   if (isLoadingGallery && displayImages.length === 0) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="text-gray-500">Loading your images...</div>
       </div>
-    )
+    );
   }
-  
+
   return (
     <div>
       <div className="mb-8">
@@ -78,38 +84,38 @@ function MyImages() {
           Your personal library of generated reference images.
         </p>
       </div>
-      
+
       <div className="mb-6 flex gap-4">
         <button
-          onClick={() => setView('all')}
+          onClick={() => setView("all")}
           className={`px-4 py-2 rounded-md ${
-            view === 'all'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            view === "all"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
           }`}
         >
           All Images
         </button>
         <button
-          onClick={() => setView('favorites')}
+          onClick={() => setView("favorites")}
           className={`px-4 py-2 rounded-md ${
-            view === 'favorites'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            view === "favorites"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
           }`}
         >
           Favorites
         </button>
       </div>
-      
+
       {displayImages.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-500 mb-4">
-            {view === 'all' 
-              ? "You haven't generated any images yet." 
+            {view === "all"
+              ? "You haven't generated any images yet."
               : "You haven't favorited any images yet."}
           </p>
-          {view === 'all' && (
+          {view === "all" && (
             <Link
               to="/generate"
               className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 inline-block"
@@ -125,22 +131,22 @@ function MyImages() {
               <ImageCard key={image.id} image={image} showActions />
             ))}
           </div>
-          
-          {hasMore && view === 'all' && (
+
+          {hasMore && view === "all" && (
             <div className="mt-8 text-center">
               <button
                 onClick={handleLoadMore}
                 disabled={isLoadingGallery}
                 className="bg-gray-200 text-gray-900 px-6 py-2 rounded-md hover:bg-gray-300 disabled:opacity-50"
               >
-                {isLoadingGallery ? 'Loading...' : 'Load More'}
+                {isLoadingGallery ? "Loading..." : "Load More"}
               </button>
             </div>
           )}
         </>
       )}
     </div>
-  )
+  );
 }
 
-export default MyImages
+export default MyImages;

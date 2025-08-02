@@ -1,24 +1,24 @@
-import { useEffect } from 'react'
-import { useAuth } from 'react-oidc-context'
-import { useNavigate } from 'react-router-dom'
+import { useEffect } from "react";
+import { useAuth } from "react-oidc-context";
+import { useNavigate } from "react-router-dom";
 
 function AuthCallback() {
-  const auth = useAuth()
-  const navigate = useNavigate()
+  const auth = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Handle the callback from Cognito
     if (auth.isAuthenticated) {
       // Redirect to the intended page or default to generate
-      const returnTo = sessionStorage.getItem('authReturnTo') || '/generate'
-      sessionStorage.removeItem('authReturnTo')
-      navigate(returnTo)
+      const returnTo = sessionStorage.getItem("authReturnTo") || "/generate";
+      sessionStorage.removeItem("authReturnTo");
+      navigate(returnTo);
     } else if (auth.error) {
       // Handle authentication error
-      console.error('Authentication error:', auth.error)
-      navigate('/login')
+      console.error("Authentication error:", auth.error);
+      navigate("/login");
     }
-  }, [auth.isAuthenticated, auth.error, navigate])
+  }, [auth.isAuthenticated, auth.error, navigate]);
 
   if (auth.isLoading) {
     return (
@@ -28,10 +28,10 @@ function AuthCallback() {
           <p className="mt-4 text-gray-600">Completing sign in...</p>
         </div>
       </div>
-    )
+    );
   }
 
-  return null
+  return null;
 }
 
-export default AuthCallback
+export default AuthCallback;

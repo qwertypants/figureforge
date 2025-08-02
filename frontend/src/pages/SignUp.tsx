@@ -1,121 +1,126 @@
-import { useState, ChangeEvent, FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff } from 'lucide-react'
-import { useAuth } from '../contexts/AuthContext'
-import useAuthStore from '../stores/authStore'
-import { SignUpForm } from '../types/types'
+import { useState, ChangeEvent, FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import useAuthStore from "../stores/authStore";
+import { SignUpForm } from "../types/types";
 
-type Step = 'form' | 'verify'
+type Step = "form" | "verify";
 
 function SignUp() {
-  const navigate = useNavigate()
-  const { signUp, confirmSignUp, resendConfirmationCode } = useAuth()
-  const { setError, error } = useAuthStore()
-  const [step, setStep] = useState<Step>('form')
+  const navigate = useNavigate();
+  const { signUp, confirmSignUp, resendConfirmationCode } = useAuth();
+  const { setError, error } = useAuthStore();
+  const [step, setStep] = useState<Step>("form");
   const [formData, setFormData] = useState<SignUpForm>({
-    email: '',
-    password: '',
-    confirmPassword: ''
-  })
-  const [verificationCode, setVerificationCode] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [verificationCode, setVerificationCode] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
-    })
-  }
-  
+      [e.target.name]: e.target.value,
+    });
+  };
+
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match')
-      return
+      setError("Passwords do not match");
+      return;
     }
-    
+
     if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters long')
-      return
+      setError("Password must be at least 8 characters long");
+      return;
     }
-    
-    setIsSubmitting(true)
-    setError(null)
-    
+
+    setIsSubmitting(true);
+    setError(null);
+
     try {
-      await signUp(formData.email, formData.password)
-      setStep('verify')
+      await signUp(formData.email, formData.password);
+      setStep("verify");
     } catch (error: any) {
-      if (error.code === 'UsernameExistsException') {
-        setError('An account with this email already exists')
-      } else if (error.code === 'InvalidPasswordException') {
-        setError('Password does not meet requirements. It must contain uppercase, lowercase, numbers, and symbols.')
+      if (error.code === "UsernameExistsException") {
+        setError("An account with this email already exists");
+      } else if (error.code === "InvalidPasswordException") {
+        setError(
+          "Password does not meet requirements. It must contain uppercase, lowercase, numbers, and symbols.",
+        );
       } else {
-        setError(error.message || 'Failed to sign up')
+        setError(error.message || "Failed to sign up");
       }
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
-  
+  };
+
   const handleVerify = async (e: FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setError(null)
-    
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
     try {
-      await confirmSignUp(formData.email, verificationCode)
+      await confirmSignUp(formData.email, verificationCode);
       // After successful verification, redirect to login
-      navigate('/login', { 
-        state: { message: 'Account verified successfully! Please sign in.' }
-      })
+      navigate("/login", {
+        state: { message: "Account verified successfully! Please sign in." },
+      });
     } catch (error: any) {
-      if (error.code === 'CodeMismatchException') {
-        setError('Invalid verification code')
-      } else if (error.code === 'ExpiredCodeException') {
-        setError('Verification code has expired. Please request a new one.')
+      if (error.code === "CodeMismatchException") {
+        setError("Invalid verification code");
+      } else if (error.code === "ExpiredCodeException") {
+        setError("Verification code has expired. Please request a new one.");
       } else {
-        setError(error.message || 'Failed to verify email')
+        setError(error.message || "Failed to verify email");
       }
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
-  
+  };
+
   const handleResendCode = async () => {
-    setIsSubmitting(true)
-    setError(null)
-    
+    setIsSubmitting(true);
+    setError(null);
+
     try {
-      await resendConfirmationCode(formData.email)
-      setError('Verification code sent! Check your email.')
+      await resendConfirmationCode(formData.email);
+      setError("Verification code sent! Check your email.");
     } catch (error: any) {
-      setError(error.message || 'Failed to resend code')
+      setError(error.message || "Failed to resend code");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
-  
-  if (step === 'verify') {
+  };
+
+  if (step === "verify") {
     return (
       <div className="max-w-md mx-auto">
         <h2 className="text-3xl font-bold text-center mb-8">Verify Email</h2>
         <p className="text-gray-600 text-center mb-6">
           We've sent a verification code to {formData.email}
         </p>
-        
+
         {error && (
           <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
             {error}
           </div>
         )}
-        
+
         <form onSubmit={handleVerify} className="space-y-6">
           <div>
-            <label htmlFor="code" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="code"
+              className="block text-sm font-medium text-gray-700"
+            >
               Verification Code
             </label>
             <input
@@ -128,15 +133,15 @@ function SignUp() {
               placeholder="Enter 6-digit code"
             />
           </div>
-          
+
           <button
             type="submit"
             disabled={isSubmitting}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? 'Verifying...' : 'Verify Email'}
+            {isSubmitting ? "Verifying..." : "Verify Email"}
           </button>
-          
+
           <button
             type="button"
             onClick={handleResendCode}
@@ -147,22 +152,25 @@ function SignUp() {
           </button>
         </form>
       </div>
-    )
+    );
   }
-  
+
   return (
     <div className="max-w-md mx-auto">
       <h2 className="text-3xl font-bold text-center mb-8">Sign Up</h2>
-      
+
       {error && (
         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
           {error}
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700"
+          >
             Email
           </label>
           <input
@@ -176,14 +184,17 @@ function SignUp() {
             placeholder="Enter your email"
           />
         </div>
-        
+
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="password"
+            className="block text-sm font-medium text-gray-700"
+          >
             Password
           </label>
           <div className="mt-1 relative">
             <input
-              type={showPassword ? 'text' : 'password'}
+              type={showPassword ? "text" : "password"}
               id="password"
               name="password"
               required
@@ -208,14 +219,17 @@ function SignUp() {
             Must contain uppercase, lowercase, numbers, and symbols
           </p>
         </div>
-        
+
         <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="confirmPassword"
+            className="block text-sm font-medium text-gray-700"
+          >
             Confirm Password
           </label>
           <div className="mt-1 relative">
             <input
-              type={showConfirmPassword ? 'text' : 'password'}
+              type={showConfirmPassword ? "text" : "password"}
               id="confirmPassword"
               name="confirmPassword"
               required
@@ -237,24 +251,24 @@ function SignUp() {
             </button>
           </div>
         </div>
-        
+
         <button
           type="submit"
           disabled={isSubmitting}
           className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isSubmitting ? 'Creating Account...' : 'Sign Up'}
+          {isSubmitting ? "Creating Account..." : "Sign Up"}
         </button>
       </form>
-      
+
       <div className="mt-6 text-center text-sm">
-        Already have an account?{' '}
+        Already have an account?{" "}
         <Link to="/login" className="text-blue-600 hover:text-blue-500">
           Sign in
         </Link>
       </div>
     </div>
-  )
+  );
 }
 
-export default SignUp
+export default SignUp;
