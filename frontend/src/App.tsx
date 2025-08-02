@@ -26,10 +26,10 @@ function ProtectedRoute({ children }: ProtectedRouteProps) {
   const auth = useAuth()
   const { isAuthenticated } = useAuthStore()
   const location = useLocation()
-  
+
   // Use OIDC auth state if available, otherwise fall back to store
   const isUserAuthenticated = auth.isAuthenticated || isAuthenticated
-  
+
   if (auth.isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -40,24 +40,24 @@ function ProtectedRoute({ children }: ProtectedRouteProps) {
       </div>
     )
   }
-  
+
   return isUserAuthenticated ? children : <Navigate to="/login" state={{ from: location }} replace />
 }
 
 function App() {
   const auth = useAuth()
   const { setUser, setLoading } = useAuthStore()
-  
+
   // Sync OIDC auth state with app store
   useEffect(() => {
     const syncAuth = async () => {
       setLoading(auth.isLoading)
-      
+
       if (auth.isAuthenticated && auth.user) {
         try {
           // Set the auth token for API calls
           localStorage.setItem('authToken', auth.user.id_token || '')
-          
+
           // Get user profile from backend
           const userProfile = await authAPI.getProfile()
           setUser(userProfile)
@@ -70,10 +70,10 @@ function App() {
         localStorage.removeItem('authToken')
       }
     }
-    
+
     syncAuth()
   }, [auth.isAuthenticated, auth.isLoading, auth.user, setUser, setLoading])
-  
+
   return (
     <Router>
       <Routes>
@@ -86,7 +86,7 @@ function App() {
           <Route path="gallery" element={<PublicGallery />} />
           <Route path="auth/callback" element={<AuthCallback />} />
           <Route path="auth/magic-link" element={<MagicLinkCallback />} />
-          
+
           {/* Protected routes */}
           <Route
             path="generate"

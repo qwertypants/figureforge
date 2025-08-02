@@ -15,7 +15,8 @@
       "Bash(npm run build:*)",
       "Bash(grep:*)",
       "Bash(aws:*)",
-      "Bash(source:*)"
+      "Bash(source:*)",
+      "Bash(curl:*)"
     ],
     "deny": []
   }

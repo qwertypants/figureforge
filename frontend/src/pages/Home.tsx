@@ -44,7 +44,7 @@ function Home() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full max-w-6xl">
         <div className="bg-white p-6 rounded-xl shadow hover:shadow-md transition">
           <img
-            src="https://via.placeholder.com/300x200"
+            src="https://placehold.co/300x200"
             alt="Customizable Poses"
             className="w-full h-40 object-cover rounded-md mb-4"
           />
@@ -56,7 +56,7 @@ function Home() {
 
         <div className="bg-white p-6 rounded-xl shadow hover:shadow-md transition">
           <img
-            src="https://via.placeholder.com/300x200"
+            src="https://placehold.co/300x200"
             alt="Professional Lighting"
             className="w-full h-40 object-cover rounded-md mb-4"
           />
@@ -68,7 +68,7 @@ function Home() {
 
         <div className="bg-white p-6 rounded-xl shadow hover:shadow-md transition">
           <img
-            src="https://via.placeholder.com/300x200"
+            src="https://placehold.co/300x200"
             alt="Build Your Library"
             className="w-full h-40 object-cover rounded-md mb-4"
           />
