@@ -8,14 +8,14 @@ FigureForge is an AI-powered figure drawing reference generator web application 
 
 ## Tech Stack
 
-- **Frontend**: React SPA with Vite, Tailwind CSS, Zustand state management
+- **Frontend**: React SPA with Vite, TypeScript, Tailwind CSS, Zustand state management
 - **Backend**: Django REST Framework on AWS Lambda (via Zappa)
-- **Database**: DynamoDB (single-table design)
-- **Authentication**: AWS Cognito
-- **Storage**: AWS S3 + CloudFront CDN
+- **Database**: DynamoDB (single-table design) + SQLite for local development
+- **Authentication**: AWS Cognito + Magic Link authentication
+- **Storage**: AWS S3 + CloudFront CDN (with signed URLs)
 - **Queue**: AWS SQS + Worker Lambda
 - **Image Generation**: fal.ai API
-- **Payments**: Stripe
+- **Payments**: Stripe (with webhook support)
 
 ## Common Development Commands
 
@@ -35,18 +35,17 @@ zappa update dev         # Update development environment
 zappa deploy production  # Deploy to production
 ```
 
-### Frontend (React/Vite)
+### Frontend (React/Vite/TypeScript)
 ```bash
 cd frontend
 
 # Development
 npm run dev              # Start development server
 npm run lint             # Run ESLint
-npm run build            # Build for production
+npm run build            # Build for production  
 npm run preview          # Preview production build
 
-# Testing
-npm test                 # Run tests (if configured)
+# Note: No test script is currently configured in package.json
 ```
 
 ## Architecture Overview
@@ -64,9 +63,12 @@ npm test                 # Run tests (if configured)
 - **Routing**: React Router for SPA navigation
 
 ### Key Patterns
-1. **Authentication Flow**: Cognito JWT tokens → Django authentication → DynamoDB user records
-2. **Image Generation**: Frontend request → Django API → SQS queue → Worker Lambda → fal.ai → S3 storage
-3. **Subscription Management**: Stripe webhooks → Django handler → DynamoDB updates
+1. **Authentication Flow**: 
+   - Standard: Cognito JWT tokens → Django CognitoAuthMiddleware → DynamoDB user records
+   - Magic Link: Email request → Cognito Lambda → Email with code → Verification endpoint
+2. **Image Generation**: Frontend request → Django API → SQS queue → Worker Lambda → fal.ai → S3 storage → CloudFront signed URLs
+3. **Subscription Management**: Stripe webhooks → Django webhook handler → DynamoDB updates
+4. **API Structure**: Modular views organized by feature (auth, images, subscriptions, webhooks)
 
 ## Development Guidelines
 
@@ -85,7 +87,8 @@ npm test                 # Run tests (if configured)
 
 ### Testing
 - Backend: Django test framework for unit and integration tests
-- Frontend: Jest/React Testing Library (if configured)
+- Frontend: No test framework currently configured
+- Test files exist in `/backend/api/tests/` for core utilities
 - Always test authentication flows and payment integrations
 
 ## Environment Setup
@@ -98,8 +101,12 @@ Backend (`.env`):
 - External: `STRIPE_SECRET_KEY`, `FAL_AI_API_KEY`
 - URLs: `FRONTEND_URL`, `BACKEND_URL`
 
-Frontend:
-- Configure API endpoint in environment-specific config files
+Frontend (`.env` or environment variables):
+- `VITE_API_URL` - Backend API endpoint
+- `VITE_STRIPE_PUBLISHABLE_KEY` - Stripe public key
+- `VITE_COGNITO_USER_POOL_ID` - Cognito user pool ID
+- `VITE_COGNITO_CLIENT_ID` - Cognito client ID
+- `VITE_COGNITO_DOMAIN` - Cognito domain
 
 ## Subscription Tiers
 - **Hobby**: $9.99/month - 50 images
@@ -107,8 +114,35 @@ Frontend:
 - **Studio**: $99.99/month - 2000 images
 
 ## Important Files
-- `/backend/api/views.py` - Main API endpoints
-- `/backend/worker/handler.py` - Image generation worker
-- `/frontend/src/App.jsx` - Main React component
-- `/docs/architecture.md` - Detailed system architecture
-- `/docs/api-spec.md` - API endpoint specifications
+- `/backend/api/urls.py` - API URL routing configuration
+- `/backend/api/views/` - Modular API views by feature
+- `/backend/worker/handler.py` - AWS Lambda handler for image generation
+- `/backend/figureforge/settings.py` - Django settings with environment variables
+- `/frontend/src/App.tsx` - Main React TypeScript component
+- `/frontend/src/stores/` - Zustand state management stores
+- `/frontend/src/api/` - API client modules
+- `/docs/` - Comprehensive documentation (14 files covering all aspects)
+
+## Additional Project Details
+
+### Python Version
+- Backend uses Python 3.10 (as configured in zappa_settings.json)
+
+### Key Dependencies
+- Backend: Django 5.2.4, DRF 3.16.0, Zappa 0.60.2, Boto3, Stripe
+- Frontend: React 19, Vite 5.4, TypeScript 5.9, Tailwind CSS 4.1, Zustand 5.0
+
+### Deployment Configuration
+- Development: 512MB memory, 30s timeout, CORS enabled
+- Production: 1024MB memory, 60s timeout, keep-warm enabled
+- S3 bucket for deployments: `figureforge-zappa-deployments`
+
+### Feature Flags (in settings.py)
+- `public_gallery`: True
+- `social_login`: False  
+- `admin_moderation`: True
+
+### Image Generation Settings
+- `MAX_BATCH_SIZE`: 4
+- `IMAGE_GENERATION_TIMEOUT`: 300 seconds (5 minutes)
+- `SIGNED_URL_TTL`: 600 seconds (10 minutes)

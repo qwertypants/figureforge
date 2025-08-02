@@ -7,11 +7,19 @@ AI-powered figure drawing reference generator with subscription management. A we
 ```
 figureforge/
 ├── backend/          # Django REST API
+│   ├── api/          # API app with views, models, etc.
 │   ├── figureforge/  # Django project settings
+│   ├── worker/       # Lambda worker for image generation
 │   ├── manage.py     # Django management script
 │   └── requirements.txt
-├── frontend/         # React SPA
+├── frontend/         # React SPA with TypeScript
 │   ├── src/          # React source code
+│   │   ├── api/      # API client modules
+│   │   ├── components/ # React components
+│   │   ├── pages/    # Page components
+│   │   ├── stores/   # Zustand state stores
+│   │   ├── types/    # TypeScript types
+│   │   └── App.tsx   # Main app component
 │   ├── public/       # Static assets
 │   └── package.json
 └── docs/             # Project documentation
@@ -19,10 +27,10 @@ figureforge/
 
 ## Tech Stack
 
-- **Frontend**: React SPA with Vite, Tailwind CSS, Zustand
+- **Frontend**: React SPA with Vite, TypeScript, Tailwind CSS, Zustand
 - **Backend**: Django REST Framework on AWS Lambda
 - **Database**: DynamoDB (single-table design)
-- **Authentication**: Amazon Cognito
+- **Authentication**: Amazon Cognito + Magic Link
 - **Storage**: AWS S3 + CloudFront CDN
 - **Queue**: AWS SQS + Worker Lambda
 - **Image Generation**: fal.ai API
