@@ -1,27 +1,17 @@
 import { Link, Outlet } from 'react-router-dom'
-import { useAuth } from 'react-oidc-context'
+import { useAuth } from '../contexts/AuthContext'
 import useAuthStore from '../stores/authStore'
 import { LayoutProps } from '../types/types'
 
 function Layout({}: LayoutProps) {
-  const auth = useAuth()
-  const { user, isAuthenticated } = useAuthStore()
+  const { isAuthenticated, signOut } = useAuth()
+  const { user } = useAuthStore()
   
-  // Use OIDC auth state if available
-  const isUserAuthenticated = auth.isAuthenticated || isAuthenticated
-  
-  const handleLogout = () => {
-    // Clear local auth state first
-    auth.removeUser()
-    useAuthStore.getState().logout()
-    
-    // Redirect to Cognito logout
-    const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID
-    const logoutUri = import.meta.env.VITE_LOGOUT_URI || window.location.origin
-    const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN
-    
-    if (cognitoDomain && clientId) {
-      window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`
+  const handleLogout = async () => {
+    try {
+      await signOut()
+    } catch (error) {
+      console.error('Logout failed:', error)
     }
   }
   
@@ -36,19 +26,25 @@ function Layout({}: LayoutProps) {
               </Link>
               
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                {isUserAuthenticated && (
+                <Link
+                  to="/gallery"
+                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 border-b-2 border-transparent hover:border-gray-300"
+                >
+                  Gallery
+                </Link>
+                <Link
+                  to="/pricing"
+                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 border-b-2 border-transparent hover:border-gray-300"
+                >
+                  Pricing
+                </Link>
+                {isAuthenticated && (
                   <>
                     <Link
                       to="/generate"
                       className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 border-b-2 border-transparent hover:border-gray-300"
                     >
                       Generate
-                    </Link>
-                    <Link
-                      to="/gallery"
-                      className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 border-b-2 border-transparent hover:border-gray-300"
-                    >
-                      Public Gallery
                     </Link>
                     <Link
                       to="/my-images"
@@ -62,7 +58,7 @@ function Layout({}: LayoutProps) {
             </div>
             
             <div className="flex items-center space-x-4">
-              {isUserAuthenticated ? (
+              {isAuthenticated ? (
                 <>
                   <Link
                     to="/account"

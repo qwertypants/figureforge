@@ -46,5 +46,16 @@ export const authAPI = {
       // Logout endpoint might not exist, continue with local logout
     }
     localStorage.removeItem('authToken')
+  },
+  
+  // Request magic link
+  requestMagicLink: async (email: string): Promise<void> => {
+    await api.post('/auth/magic-link/request/', { email })
+  },
+  
+  // Verify magic link
+  verifyMagicLink: async (email: string, code: string): Promise<{ access_token: string }> => {
+    const response = await api.post('/auth/magic-link/verify/', { email, code })
+    return response.data
   }
 }
