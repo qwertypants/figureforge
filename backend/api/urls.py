@@ -6,6 +6,7 @@ from django.urls import path
 from api.views import (
     # Auth views
     auth,
+    magic_link_auth,
     # Image views
     images,
     # Subscription views
@@ -23,6 +24,11 @@ urlpatterns = [
     path('auth/user/stats/', auth.get_user_stats, name='get_user_stats'),
     path('auth/verify/', auth.verify_token, name='verify_token'),
     path('auth/delete/', auth.delete_account, name='delete_account'),
+    
+    # Magic link authentication
+    path('auth/magic-link/request/', magic_link_auth.request_magic_link, name='request_magic_link'),
+    path('auth/magic-link/verify/', magic_link_auth.verify_magic_link, name='verify_magic_link'),
+    path('auth/magic-link/check-user/', magic_link_auth.check_magic_link_user, name='check_magic_link_user'),
     
     # Image generation endpoints
     path('images/generate/', images.generate_images, name='generate_images'),

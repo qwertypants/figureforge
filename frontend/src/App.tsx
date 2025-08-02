@@ -18,6 +18,8 @@ import MyImages from './pages/MyImages'
 import Account from './pages/Account'
 import Pricing from './pages/Pricing'
 import AuthCallback from './pages/AuthCallback'
+import MagicLinkLogin from './pages/MagicLinkLogin'
+import MagicLinkCallback from './pages/MagicLinkCallback'
 
 // Protected Route component
 function ProtectedRoute({ children }: ProtectedRouteProps) {
@@ -78,10 +80,12 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="login" element={<Login />} />
+          <Route path="login/magic-link" element={<MagicLinkLogin />} />
           <Route path="signup" element={<SignUp />} />
           <Route path="pricing" element={<Pricing />} />
           <Route path="gallery" element={<PublicGallery />} />
           <Route path="auth/callback" element={<AuthCallback />} />
+          <Route path="auth/magic-link" element={<MagicLinkCallback />} />
           
           {/* Protected routes */}
           <Route

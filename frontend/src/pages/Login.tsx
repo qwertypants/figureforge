@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from 'react-oidc-context'
+import { Mail } from 'lucide-react'
 import useAuthStore from '../stores/authStore'
 import { LocationState } from '../types/types'
 
@@ -57,8 +58,25 @@ function Login() {
           Sign In with Cognito
         </button>
         
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300" />
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-gray-500">Or continue with</span>
+          </div>
+        </div>
+        
+        <Link
+          to="/login/magic-link"
+          className="w-full flex items-center justify-center gap-2 bg-white text-gray-700 py-3 px-4 rounded-md border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+        >
+          <Mail className="h-5 w-5" />
+          Sign in with Magic Link
+        </Link>
+        
         <div className="text-center text-sm text-gray-600">
-          Sign in using your email and password through AWS Cognito
+          We'll send you a secure link to sign in without a password
         </div>
       </div>
       
