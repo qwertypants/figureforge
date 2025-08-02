@@ -2,6 +2,32 @@
 Test cases for Stripe client and webhook handler
 """
 
+from django.conf import settings
+
+# Configure Django settings for testing
+if not settings.configured:
+    settings.configure(
+        AWS_REGION='us-east-1',
+        AWS_ACCESS_KEY_ID='test-key-id',
+        AWS_SECRET_ACCESS_KEY='test-secret-key',
+        AWS_DYNAMODB_TABLE_NAME='test-table',
+        STRIPE_SECRET_KEY='sk_test_dummy',
+        STRIPE_WEBHOOK_SECRET='whsec_test_dummy',
+        DEBUG=True,
+        DATABASES={
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': ':memory:',
+            }
+        },
+        INSTALLED_APPS=[
+            'django.contrib.auth',
+            'django.contrib.contenttypes',
+            'api',
+        ],
+        USE_TZ=True,
+    )
+
 import pytest
 import stripe
 import time
@@ -144,10 +170,15 @@ class TestStripeClient:
     
     def test_create_checkout_session_invalid_plan(self, client):
         """Test checkout session with invalid plan"""
-        client.user_repo.get_user.return_value = {'user_id': 'user123'}
+        client.user_repo.get_user.return_value = {
+            'user_id': 'user123',
+            'email': 'test@example.com'
+        }
         
-        with pytest.raises(ValueError) as exc_info:
-            client.create_checkout_session('user123', 'invalid_plan', 'url1', 'url2')
+        # Mock create_customer to avoid actual API call
+        with patch.object(client, 'create_customer', return_value='cus_123'):
+            with pytest.raises(ValueError) as exc_info:
+                client.create_checkout_session('user123', 'invalid_plan', 'url1', 'url2')
         
         assert 'Invalid plan' in str(exc_info.value)
     
@@ -301,7 +332,10 @@ class TestStripeWebhookHandler:
     @patch('stripe.Webhook.construct_event')
     def test_handle_webhook_invalid_signature(self, mock_construct, handler):
         """Test webhook with invalid signature"""
-        mock_construct.side_effect = stripe.error.SignatureVerificationError('Invalid sig')
+        mock_construct.side_effect = stripe.error.SignatureVerificationError(
+            'Invalid sig', 
+            sig_header='bad_signature'
+        )
         
         with pytest.raises(Exception) as exc_info:
             handler.handle_webhook('payload', 'bad_signature')

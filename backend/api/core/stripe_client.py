@@ -10,16 +10,13 @@ from django.conf import settings
 from api.core.dynamodb_utils import SubscriptionRepository, UserRepository
 
 
-# Configure Stripe
-stripe.api_key = settings.STRIPE_SECRET_KEY
-
-
 class StripeClient:
     """Client for interacting with Stripe API"""
     
     def __init__(self):
         self.subscription_repo = SubscriptionRepository()
         self.user_repo = UserRepository()
+        self._stripe_configured = False
         
         # Define subscription plans
         self.plans = {
@@ -64,8 +61,15 @@ class StripeClient:
             }
         }
     
+    def _ensure_stripe_configured(self):
+        """Configure Stripe API key if not already done"""
+        if not self._stripe_configured:
+            stripe.api_key = settings.STRIPE_SECRET_KEY
+            self._stripe_configured = True
+    
     def create_customer(self, user_id: str, email: str) -> str:
         """Create a Stripe customer for a user"""
+        self._ensure_stripe_configured()
         try:
             customer = stripe.Customer.create(
                 email=email,
@@ -87,6 +91,7 @@ class StripeClient:
     def create_checkout_session(self, user_id: str, plan_key: str, 
                               success_url: str, cancel_url: str) -> str:
         """Create a Stripe checkout session for subscription"""
+        self._ensure_stripe_configured()
         user = self.user_repo.get_user(user_id)
         if not user:
             raise ValueError("User not found")
@@ -124,6 +129,7 @@ class StripeClient:
     
     def create_billing_portal_session(self, user_id: str, return_url: str) -> str:
         """Create a Stripe billing portal session"""
+        self._ensure_stripe_configured()
         user = self.user_repo.get_user(user_id)
         if not user or not user.get("stripe_customer_id"):
             raise ValueError("User has no Stripe customer")
@@ -142,6 +148,7 @@ class StripeClient:
     def cancel_subscription(self, user_id: str, subscription_id: str, 
                           at_period_end: bool = True) -> Dict:
         """Cancel a subscription"""
+        self._ensure_stripe_configured()
         try:
             if at_period_end:
                 # Cancel at end of billing period
@@ -175,6 +182,7 @@ class StripeClient:
     
     def get_subscription_details(self, subscription_id: str) -> Dict:
         """Get subscription details from Stripe"""
+        self._ensure_stripe_configured()
         try:
             subscription = stripe.Subscription.retrieve(subscription_id)
             
@@ -201,9 +209,17 @@ class StripeWebhookHandler:
         self.client = StripeClient()
         self.subscription_repo = SubscriptionRepository()
         self.user_repo = UserRepository()
+        self._stripe_configured = False
+    
+    def _ensure_stripe_configured(self):
+        """Configure Stripe API key if not already done"""
+        if not self._stripe_configured:
+            stripe.api_key = settings.STRIPE_SECRET_KEY
+            self._stripe_configured = True
     
     def handle_webhook(self, payload: str, signature: str) -> Dict:
         """Process a Stripe webhook"""
+        self._ensure_stripe_configured()
         try:
             # Verify webhook signature
             event = stripe.Webhook.construct_event(
@@ -246,6 +262,7 @@ class StripeWebhookHandler:
     
     def _handle_subscription_created(self, event: Dict) -> Dict:
         """Handle new subscription creation"""
+        self._ensure_stripe_configured()
         subscription = event["data"]["object"]
         
         # Get user from customer
@@ -287,6 +304,7 @@ class StripeWebhookHandler:
     
     def _handle_subscription_updated(self, event: Dict) -> Dict:
         """Handle subscription updates"""
+        self._ensure_stripe_configured()
         subscription = event["data"]["object"]
         
         # Get user from customer
@@ -322,6 +340,7 @@ class StripeWebhookHandler:
     
     def _handle_subscription_deleted(self, event: Dict) -> Dict:
         """Handle subscription cancellation"""
+        self._ensure_stripe_configured()
         subscription = event["data"]["object"]
         
         # Get user from customer
@@ -352,6 +371,7 @@ class StripeWebhookHandler:
     
     def _handle_payment_succeeded(self, event: Dict) -> Dict:
         """Handle successful payment"""
+        self._ensure_stripe_configured()
         invoice = event["data"]["object"]
         
         # Reset monthly quota on successful payment

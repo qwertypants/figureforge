@@ -2,6 +2,15 @@
 Test cases for fal.ai client
 """
 
+import os
+import sys
+import django
+from django.conf import settings
+
+# Configure Django settings before imports
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'figureforge.settings')
+django.setup()
+
 import pytest
 import time
 import requests
@@ -17,8 +26,7 @@ class TestFalAIClient:
     @pytest.fixture
     def client(self):
         """Create FalAIClient instance"""
-        with patch('api.core.fal_client.settings') as mock_settings:
-            mock_settings.FAL_API_KEY = 'test-api-key'
+        with patch('api.core.fal_client.settings.FAL_API_KEY', 'test-api-key'):
             return FalAIClient()
     
     def test_init_sets_headers(self, client):

@@ -8,6 +8,31 @@ import time
 from unittest.mock import Mock, patch, MagicMock
 from decimal import Decimal
 from botocore.exceptions import ClientError
+from django.test import TestCase
+from django.conf import settings
+
+# Configure Django settings for testing
+from django.conf import settings
+if not settings.configured:
+    settings.configure(
+        AWS_REGION='us-east-1',
+        AWS_ACCESS_KEY_ID='test-key-id',
+        AWS_SECRET_ACCESS_KEY='test-secret-key',
+        AWS_DYNAMODB_TABLE_NAME='test-table',
+        DEBUG=True,
+        DATABASES={
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': ':memory:',
+            }
+        },
+        INSTALLED_APPS=[
+            'django.contrib.auth',
+            'django.contrib.contenttypes',
+            'api',
+        ],
+        USE_TZ=True,
+    )
 
 from api.core.dynamodb_utils import (
     DynamoDBClient, UserRepository, ImageRepository, 

@@ -16,7 +16,11 @@
       "Bash(grep:*)",
       "Bash(aws:*)",
       "Bash(source:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(python -m pytest api/core/tests/test_dynamodb_utils.py -v)",
+      "Bash(python -m pytest api/core/tests/test_stripe_client.py -v)",
+      "Bash(python -m pytest api/core/tests/test_fal_client.py -v)",
+      "Bash(python manage.py test:*)"
     ],
     "deny": []
   }
