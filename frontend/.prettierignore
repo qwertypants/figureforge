@@ -1,0 +1,7 @@
+dist
+node_modules
+coverage
+.vite
+public
+*.min.js
+*.min.css
