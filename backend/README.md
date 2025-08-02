@@ -75,36 +75,16 @@ python manage.py runserver
 
 The API will be available at `http://localhost:8000/`
 
-### API Endpoints
+### API Documentation
 
-#### Authentication
-- `GET /api/auth/user/` - Get current user
-- `PUT /api/auth/user/update/` - Update user profile
-- `GET /api/auth/user/stats/` - Get user statistics
-- `POST /api/auth/verify/` - Verify JWT token
-- `DELETE /api/auth/delete/` - Delete account
+For complete API documentation including request/response formats, see [`../docs/api-spec.md`](../docs/api-spec.md).
 
-#### Image Generation
-- `POST /api/images/generate/` - Create generation job
-- `GET /api/images/job/{job_id}/` - Get job status
-- `GET /api/images/user/` - Get user's images
-- `GET /api/images/gallery/` - Get public gallery
-- `GET /api/images/{image_id}/` - Get image details
-- `DELETE /api/images/{image_id}/delete/` - Delete image
-- `PUT /api/images/{image_id}/update/` - Update image metadata
-- `GET /api/images/models/` - Get available models
-
-#### Subscriptions
-- `GET /api/subscriptions/plans/` - Get subscription plans
-- `GET /api/subscriptions/current/` - Get current subscription
-- `POST /api/subscriptions/checkout/` - Create checkout session
-- `POST /api/subscriptions/portal/` - Create billing portal session
-- `POST /api/subscriptions/cancel/` - Cancel subscription
-- `POST /api/subscriptions/reactivate/` - Reactivate subscription
-
-#### Webhooks
-- `POST /api/webhooks/stripe/` - Stripe webhook handler
-- `GET /api/webhooks/health/` - Health check
+#### Key Endpoints:
+- **Authentication**: `/api/auth/` - User management, magic link auth
+- **Images**: `/api/images/` - Generation, galleries, management
+- **Subscriptions**: `/api/subscriptions/` - Plans, checkout, billing
+- **Webhooks**: `/api/webhooks/` - Stripe integration
+- **Pricing**: `/api/pricing/` - Public pricing information
 
 ### Deployment
 
@@ -212,26 +192,40 @@ backend/
 │   │   ├── s3_utils.py
 │   │   ├── sqs_utils.py
 │   │   ├── fal_client.py
-│   │   └── stripe_client.py
+│   │   ├── stripe_client.py
+│   │   └── tests/        # Unit tests
 │   ├── middleware/        # Custom middleware
 │   │   └── cognito_auth.py
 │   ├── views/            # API views
 │   │   ├── auth.py
 │   │   ├── images.py
+│   │   ├── magic_link_auth.py
+│   │   ├── pricing.py
 │   │   ├── subscriptions.py
 │   │   └── webhooks.py
 │   └── urls.py           # API routes
 ├── figureforge/          # Django project settings
+├── lambda_functions/     # Cognito Lambda triggers
 ├── worker/               # Lambda worker for jobs
 ├── manage.py
 ├── requirements.txt
+├── pricing.json          # Pricing configuration
 └── zappa_settings.json
 ```
 
 ## Development Notes
 
 - All data is stored in DynamoDB using single-table design
-- Authentication is handled by AWS Cognito
-- Images are stored in S3 with signed URLs
-- Job processing is async via SQS and Lambda
-- Stripe webhooks update subscription status
+- Authentication is handled by AWS Cognito (with magic link support)
+- Images are stored in S3 with CloudFront signed URLs
+- Job processing is async via SQS and Lambda workers
+- Stripe webhooks update subscription status in real-time
+- Feature flags stored in DynamoDB for runtime configuration
+- Moderation system with AI-assisted flagging
+
+## Related Documentation
+
+- [Architecture Overview](../docs/architecture.md)
+- [Data Structure](../docs/data-structure.md)
+- [Deployment Guide](../docs/deployment-checklist.md)
+- [Implementation Summary](../docs/implementation-summary.md)
