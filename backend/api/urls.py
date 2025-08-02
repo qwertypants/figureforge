@@ -12,7 +12,9 @@ from api.views import (
     # Subscription views
     subscriptions,
     # Webhook views
-    webhooks
+    webhooks,
+    # Pricing views
+    pricing
 )
 
 app_name = 'api'
@@ -40,6 +42,9 @@ urlpatterns = [
     path('images/<str:image_id>/update/', images.update_image_metadata, name='update_image_metadata'),
     path('images/<str:image_id>/favorite/', images.favorite_image, name='favorite_image'),
     path('images/models/', images.get_generation_models, name='get_generation_models'),
+    
+    # Pricing endpoints
+    path('pricing/', pricing.get_pricing, name='get_pricing'),
     
     # Subscription endpoints
     path('subscriptions/plans/', subscriptions.get_subscription_plans, name='get_subscription_plans'),
