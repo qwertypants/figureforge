@@ -126,6 +126,13 @@ Authorization: Bearer <token>
 - Returns available AI models for image generation
 - Response: `{ "models": [{"id": "flux-pro", "name": "FLUX Pro", "credits": 2}] }`
 
+### Pricing
+
+#### Get Pricing
+`GET /api/pricing/`
+- Returns current pricing information for all plans
+- Public endpoint (no authentication required)
+
 ### Subscription Management
 
 #### Get Subscription Plans

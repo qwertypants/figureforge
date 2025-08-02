@@ -3,8 +3,15 @@
 ## Auth
 - **Amazon Cognito** (User Pool)
   - Email/password
+  - Magic Link authentication (passwordless)
   - Social: Google, Apple (optional)
 - JWT validated by API Gateway / backend.
+- **Magic Link Flow**:
+  1. User requests magic link with email
+  2. Cognito Lambda generates 6-digit code
+  3. Email sent with verification code
+  4. User enters code to receive JWT tokens
+  5. No password required for sign-in
 
 ## Roles
 - `user` (default)

@@ -1,15 +1,19 @@
 # Tasks
 
-## Backend
-- [ ] Scaffold Django REST API for Lambda (Zappa/Serverless).
-- [ ] Integrate Cognito JWT validation middleware.
-- [ ] Implement DynamoDB single-table CRUD helpers.
-- [ ] Implement `/generate` (enqueue SQS job).
-- [ ] Implement Job Worker Lambda (LLM prompt + fal.ai → S3/DynamoDB).
-- [ ] Implement `/jobs/:id` polling endpoint.
-- [ ] Stripe webhook handler (subscription lifecycle, quota sync).
-- [ ] Feature flags endpoint.
-- [ ] Admin moderation endpoints.
+## Backend (✅ COMPLETED)
+- [x] Scaffold Django REST API for Lambda (Zappa/Serverless).
+- [x] Integrate Cognito JWT validation middleware.
+- [x] Implement DynamoDB single-table CRUD helpers.
+- [x] Implement `/generate` (enqueue SQS job).
+- [x] Implement Job Worker Lambda (LLM prompt + fal.ai → S3/DynamoDB).
+- [x] Implement `/jobs/:id` polling endpoint.
+- [x] Stripe webhook handler (subscription lifecycle, quota sync).
+- [x] Feature flags endpoint.
+- [x] Admin moderation endpoints.
+- [x] Magic link authentication flow.
+- [x] Pricing endpoint for public access.
+- [x] User stats and profile management.
+- [x] Image metadata updates and favorites.
 
 ## Frontend
 - [ ] React SPA bootstrap (Vite).
