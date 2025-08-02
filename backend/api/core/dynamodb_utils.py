@@ -31,7 +31,15 @@ class DynamoDBClient:
             if isinstance(value, float):
                 serialized[key] = Decimal(str(value))
             elif isinstance(value, list):
-                serialized[key] = [self._serialize_item({'v': v})['v'] if isinstance(v, dict) else v for v in value]
+                serialized_list = []
+                for v in value:
+                    if isinstance(v, float):
+                        serialized_list.append(Decimal(str(v)))
+                    elif isinstance(v, dict):
+                        serialized_list.append(self._serialize_item(v))
+                    else:
+                        serialized_list.append(v)
+                serialized[key] = serialized_list
             elif isinstance(value, dict):
                 serialized[key] = self._serialize_item(value)
             else:
@@ -45,7 +53,15 @@ class DynamoDBClient:
             if isinstance(value, Decimal):
                 deserialized[key] = float(value)
             elif isinstance(value, list):
-                deserialized[key] = [self._deserialize_item({'v': v})['v'] if isinstance(v, dict) else v for v in value]
+                deserialized_list = []
+                for v in value:
+                    if isinstance(v, Decimal):
+                        deserialized_list.append(float(v))
+                    elif isinstance(v, dict):
+                        deserialized_list.append(self._deserialize_item(v))
+                    else:
+                        deserialized_list.append(v)
+                deserialized[key] = deserialized_list
             elif isinstance(value, dict):
                 deserialized[key] = self._deserialize_item(value)
             else:

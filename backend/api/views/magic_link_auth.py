@@ -10,6 +10,14 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.conf import settings
 
+# Validate required settings
+if not settings.COGNITO_USER_POOL_ID:
+    raise ValueError("COGNITO_USER_POOL_ID is not set in environment variables")
+if not settings.COGNITO_CLIENT_ID:
+    raise ValueError("COGNITO_CLIENT_ID is not set in environment variables")
+if not settings.COGNITO_REGION:
+    raise ValueError("COGNITO_REGION is not set in environment variables")
+
 # Initialize Cognito client
 cognito = boto3.client(
     'cognito-idp',
@@ -32,14 +40,27 @@ def request_magic_link(request):
         )
     
     try:
-        # Check if user exists
+        # Generate a unique username based on email
+        import uuid
+        username = f"user_{uuid.uuid4().hex[:8]}"
+        
+        # Check if user exists by email
         try:
-            user_response = cognito.admin_get_user(
+            # List users with the given email
+            response = cognito.list_users(
                 UserPoolId=settings.COGNITO_USER_POOL_ID,
-                Username=email
+                Filter=f'email = "{email}"',
+                Limit=1
             )
-            user_exists = True
-        except cognito.exceptions.UserNotFoundException:
+            
+            if response['Users']:
+                user_exists = True
+                username = response['Users'][0]['Username']
+            else:
+                user_exists = False
+                
+        except Exception as e:
+            print(f"Error checking user existence: {str(e)}")
             user_exists = False
         
         if not user_exists:
@@ -50,7 +71,7 @@ def request_magic_link(request):
             
             cognito.admin_create_user(
                 UserPoolId=settings.COGNITO_USER_POOL_ID,
-                Username=email,
+                Username=username,  # Use generated username instead of email
                 UserAttributes=[
                     {'Name': 'email', 'Value': email},
                     {'Name': 'email_verified', 'Value': 'true'}
@@ -62,18 +83,18 @@ def request_magic_link(request):
             # Set permanent password to allow custom auth
             cognito.admin_set_user_password(
                 UserPoolId=settings.COGNITO_USER_POOL_ID,
-                Username=email,
+                Username=username,
                 Password=temp_password,
                 Permanent=True
             )
         
-        # Initiate auth flow
+        # Initiate auth flow using email as the auth parameter
         auth_response = cognito.admin_initiate_auth(
             UserPoolId=settings.COGNITO_USER_POOL_ID,
             ClientId=settings.COGNITO_CLIENT_ID,
             AuthFlow='CUSTOM_AUTH',
             AuthParameters={
-                'USERNAME': email
+                'USERNAME': email  # Cognito will map this to the actual username via email alias
             }
         )
         
@@ -168,13 +189,18 @@ def check_magic_link_user(request):
         )
     
     try:
-        cognito.admin_get_user(
+        # List users with the given email
+        response = cognito.list_users(
             UserPoolId=settings.COGNITO_USER_POOL_ID,
-            Username=email
+            Filter=f'email = "{email}"',
+            Limit=1
         )
-        return Response({'exists': True})
-    except cognito.exceptions.UserNotFoundException:
-        return Response({'exists': False})
+        
+        if response['Users']:
+            return Response({'exists': True})
+        else:
+            return Response({'exists': False})
+            
     except Exception as e:
         print(f"User check error: {str(e)}")
         return Response(

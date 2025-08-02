@@ -145,10 +145,62 @@ zip -r worker.zip .
 
 ### Testing
 
-Run tests:
+The tests are written using pytest. To run them:
+
+#### Prerequisites
 ```bash
-python manage.py test
+pip install pytest pytest-cov
 ```
+
+#### Running Tests
+
+**Run all tests in api/core**:
+```bash
+export DJANGO_SETTINGS_MODULE=figureforge.settings
+pytest api/core/tests/ -v
+```
+
+**Run a specific test file**:
+```bash
+export DJANGO_SETTINGS_MODULE=figureforge.settings
+pytest api/core/tests/test_dynamodb_utils.py -v
+```
+
+**Run tests with coverage**:
+```bash
+export DJANGO_SETTINGS_MODULE=figureforge.settings
+pytest api/core/tests/ --cov=api.core -v
+```
+
+**Run a specific test class**:
+```bash
+export DJANGO_SETTINGS_MODULE=figureforge.settings
+pytest api/core/tests/test_dynamodb_utils.py::TestDynamoDBClient -v
+```
+
+**Run a specific test method**:
+```bash
+export DJANGO_SETTINGS_MODULE=figureforge.settings
+pytest api/core/tests/test_dynamodb_utils.py::TestDynamoDBClient::test_serialize_item_converts_floats_to_decimal -v
+```
+
+#### Alternative: Using Django's test runner
+
+If you prefer Django's test runner (though it won't run the pytest-style tests):
+```bash
+python manage.py test api
+```
+
+#### Test Structure
+
+Tests are located in `api/core/tests/`:
+- `test_dynamodb_utils.py` - Tests for DynamoDB operations
+- `test_s3_utils.py` - Tests for S3 and CloudFront utilities
+- `test_sqs_utils.py` - Tests for SQS queue operations
+- `test_fal_client.py` - Tests for fal.ai API client
+- `test_stripe_client.py` - Tests for Stripe integration
+
+**Note**: Make sure you have the required environment variables set (or mocked) before running tests.
 
 ### Project Structure
 
