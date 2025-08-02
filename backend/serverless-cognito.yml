@@ -1,0 +1,66 @@
+service: figureforge-cognito-triggers
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: ${opt:region, 'us-east-1'}
+  environment:
+    DYNAMODB_TABLE: ${opt:dynamodb-table, 'figureforge'}
+    FRONTEND_URL: ${opt:frontend-url, 'http://localhost:5173'}
+    FROM_EMAIL: ${opt:from-email, 'noreply@figureforge.com'}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:GetItem
+        - dynamodb:UpdateItem
+      Resource: !GetAtt DynamoDBTable.Arn
+    - Effect: Allow
+      Action:
+        - ses:SendEmail
+      Resource: '*'
+
+functions:
+  defineAuthChallenge:
+    handler: lambda_functions.cognito_magic_link.define_auth_challenge
+    events:
+      - cognitoUserPool:
+          pool: ${opt:user-pool-name, 'figureforge-users'}
+          trigger: DefineAuthChallenge
+          existing: true
+
+  createAuthChallenge:
+    handler: lambda_functions.cognito_magic_link.create_auth_challenge
+    events:
+      - cognitoUserPool:
+          pool: ${opt:user-pool-name, 'figureforge-users'}
+          trigger: CreateAuthChallenge
+          existing: true
+
+  verifyAuthChallengeResponse:
+    handler: lambda_functions.cognito_magic_link.verify_auth_challenge_response
+    events:
+      - cognitoUserPool:
+          pool: ${opt:user-pool-name, 'figureforge-users'}
+          trigger: VerifyAuthChallengeResponse
+          existing: true
+
+  preSignUp:
+    handler: lambda_functions.cognito_magic_link.pre_signup
+    events:
+      - cognitoUserPool:
+          pool: ${opt:user-pool-name, 'figureforge-users'}
+          trigger: PreSignUp
+          existing: true
+
+resources:
+  Resources:
+    # Reference to existing DynamoDB table
+    DynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
