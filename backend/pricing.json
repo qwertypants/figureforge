@@ -1,0 +1,32 @@
+[
+  {
+    "plan_id": "starter_100",
+    "name": "Starter",
+    "price_usd_month": 5,
+    "stripe_price_id": "price_replace_this_starter",
+    "images_per_month": 100,
+    "batch_cap": 4,
+    "upsell_threshold_pct": 0.9,
+    "active": true
+  },
+  {
+    "plan_id": "pro_500",
+    "name": "Pro",
+    "price_usd_month": 15,
+    "stripe_price_id": "price_replace_this_pro",
+    "images_per_month": 500,
+    "batch_cap": 4,
+    "upsell_threshold_pct": 0.9,
+    "active": true
+  },
+  {
+    "plan_id": "studio_1500",
+    "name": "Studio",
+    "price_usd_month": 45,
+    "stripe_price_id": "price_replace_this_studio",
+    "images_per_month": 1500,
+    "batch_cap": 4,
+    "upsell_threshold_pct": 0.9,
+    "active": true
+  }
+]
