@@ -281,16 +281,27 @@ class TestCloudFrontSigner:
         """Test generating signed CloudFront URL"""
         s3_url = 's3://test-bucket/images/user123/image456.png'
         
-        with patch('api.core.s3_utils.datetime') as mock_dt:
-            mock_dt.utcnow.return_value = datetime(2023, 1, 1, 0, 0, 0)
-            mock_dt.utcnow.return_value.timestamp.return_value = 1672531200.0
+        # Calculate expected expire time (base time + 600 seconds)
+        base_time = datetime(2023, 1, 1, 0, 0, 0)
+        expected_expire_time = int((base_time + timedelta(seconds=600)).timestamp())
+        
+        with patch('api.core.s3_utils.settings') as mock_settings:
+            # Mock settings for URL generation
+            mock_settings.AWS_S3_BUCKET_NAME = 'test-bucket'
             
-            with patch.object(signer, '_sign_policy', return_value='fake-signature'):
-                result = signer.generate_signed_url(s3_url, expires_in_seconds=600)
+            with patch('api.core.s3_utils.datetime') as mock_datetime:
+                # Import the real datetime module classes
+                from datetime import datetime as real_datetime, timedelta as real_timedelta
+                # Set datetime to be the real class but with mocked utcnow
+                mock_datetime.utcnow.return_value = base_time
+                mock_datetime.side_effect = lambda *args, **kwargs: real_datetime(*args, **kwargs)
+                
+                with patch.object(signer, '_sign_policy', return_value='fake-signature'):
+                    result = signer.generate_signed_url(s3_url, expires_in_seconds=600)
         
         # Should convert to CloudFront URL and add signature
         assert result.startswith('https://cdn.example.com/images/user123/image456.png')
-        assert 'Expires=' in result
+        assert f'Expires={expected_expire_time}' in result
         assert 'Signature=fake-signature' in result
         assert 'Key-Pair-Id=KEYPAIRID123' in result
     
@@ -298,6 +309,8 @@ class TestCloudFrontSigner:
         """Test generating URL when CloudFront not configured"""
         with patch('api.core.s3_utils.settings') as mock_settings:
             mock_settings.CLOUDFRONT_DOMAIN = None
+            mock_settings.CLOUDFRONT_KEY_PAIR_ID = None
+            mock_settings.CLOUDFRONT_PRIVATE_KEY = None
             mock_settings.AWS_S3_BUCKET_NAME = 'test-bucket'
             
             signer = CloudFrontSigner()
@@ -313,7 +326,10 @@ class TestCloudFrontSigner:
         signer.private_key = None
         s3_url = 's3://test-bucket/images/test.png'
         
-        result = signer.generate_signed_url(s3_url)
+        with patch('api.core.s3_utils.settings') as mock_settings:
+            mock_settings.AWS_S3_BUCKET_NAME = 'test-bucket'
+            
+            result = signer.generate_signed_url(s3_url)
         
         # Should return unsigned CloudFront URL
         assert result == 'https://cdn.example.com/images/test.png'

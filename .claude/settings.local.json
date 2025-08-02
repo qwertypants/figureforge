@@ -20,7 +20,10 @@
       "Bash(python -m pytest api/core/tests/test_dynamodb_utils.py -v)",
       "Bash(python -m pytest api/core/tests/test_stripe_client.py -v)",
       "Bash(python -m pytest api/core/tests/test_fal_client.py -v)",
-      "Bash(python manage.py test:*)"
+      "Bash(python manage.py test:*)",
+      "Bash(python -m pytest api/core/tests/test_s3_utils.py -xvs)",
+      "Bash(python -m pytest api/core/tests/test_s3_utils.py::TestCloudFrontSigner::test_generate_signed_url_with_cloudfront -xvs)",
+      "Bash(python -m pytest api/core/tests/test_s3_utils.py -v)"
     ],
     "deny": []
   }
